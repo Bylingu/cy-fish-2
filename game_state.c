@@ -68,7 +68,7 @@ int xy_to_index(GameState *state, int row, int column) {
 void next_player(GameState *state) {
     state->currentPlayer = (state->currentPlayer + 1) % state->playerCount;
     if (state->currentPlayer == 0)
-        state->round++;
+        state->round++; // Changing turns
 }
 
 // Frees the memory allocated for the game state
