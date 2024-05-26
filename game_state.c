@@ -55,7 +55,7 @@ bool isValidPosition(GameState *state, int row, int col) {
 }
 
 // Converts a row and column to an index in the display grid
-char *xy_to_index_display_grid(GameState *state, char *display_grid, int row, int column, int x, int y) {
+char *xy_to_index_display_grid(GameState *state, char *display_grid, int row, int column, int x, int y) { // transform y to postion index - 2d index to array index
     return display_grid + (row * 4 + y + (column % 2 != 0 ? 2 : 0)) * (state->columns * 6 + 3) + column * 6 + x;
 }
 
@@ -88,7 +88,8 @@ struct Move *get_penguin_valid_moves(GameState *state, struct Penguin *penguin, 
 
     /*
      * 4,4 -> 4,3  5,3  5,4  4,5  3,4  3,3
-     * 3,3 -> 3,2  4,3  4,4  3,4  2,4  2,3
+     * 3,3 -> 3,2  4,3  4,4  3,4  2,4  2,3 // This function returns all the possible moves the penguin can do in the grid,
+                                             // Later the move entered will be checked if it is valid or not
      */
 
     // UP-WARD
@@ -205,7 +206,8 @@ void init_grid(GameState *state, int rows, int columns) {
 
     do {
         for (int i = 0; i < state->rows; ++i) {
-            for (int j = 0; j < state->columns; ++j) {
+            for (int j = 0; j < state->columns; ++j) {  // Filling the grid with fishes as many times until a random grid  with fishes with enough
+                                                         // one fish cells for each person
                 int fishes = 1 + rand() % 3;
                 get_cell(state, i, j)->fishes = fishes;
                 if (fishes == 1)
@@ -232,8 +234,11 @@ void init_grid(GameState *state, int rows, int columns) {
     }
 
     int display_grid_size = (rows * 4 + 3) * (columns * 6 + 3);
-    state->display_grid = (char *) malloc(display_grid_size * sizeof(char));
-    for (int i = 0; i < display_grid_size; ++i) {
+    state->display_grid = (char *) malloc(display_grid_size * sizeof(char)); 
+   
+    //  Initialising the display grid with a hexagonal comb visual 
+   
+    for (int i = 0; i < display_grid_size; ++i) { 
         if (i % (columns * 6 + 3) == columns * 6 + 2)
             state->display_grid[i] = '\n';
         else
@@ -311,12 +316,11 @@ struct Cell *get_cell(GameState *state, int row, int column) {
 
 // Display the game grid
 void display_grid(GameState *state) {
-    // Displaying the grid
     char *dup = strdup(state->display_grid);
 
     int fishCount = 0;
     for (int i = 0; i < state->rows; ++i) {
-        for (int j = 0; j < state->columns; ++j) {
+        for (int j = 0; j < state->columns; ++j) { // 2D transformation
             int fishes = get_cell(state, i, j)->fishes;
 
             if (fishes == 0) {
@@ -350,14 +354,19 @@ void display_grid(GameState *state) {
     int penguinCount = 0;
     for (int i = 0; i < state->playerCount; ++i) {
         for (int j = 0; j < state->players[i].penguineCount; ++j) {
-            *xy_to_index_display_grid(state, dup, state->players[i].penguins[j].row,
+            *xy_to_index_display_grid(state, dup, state->players[i].penguins[j].row,    ////// To display the screen there is 3 transformations - a grid comb that is mmade in the start
+                                                                                             /// of the game when rows and colums are defined , as they will not be changed during the game       
+                                                                                             /// The second transformation adds a penguine fishes to duplicated the first transformation.
+                                                                                             /// Basically adding P and F to the required position. Fish and penguin emoji cannot directly be
+                                                                                             // added as they are 4 bytes and characters are one . The solution is the 3rd transformation which we 
+                                                                                             /// create a new grid but bigger in size in array to accomodate the emojies, Then we replace P and F with emojies
                                       state->players[i].penguins[j].column, 1, 2) = 'P';
             penguinCount++;
         }
     }
 
     int dup_len = strlen(dup);
-    int advance_display_size = dup_len + (penguinCount + fishCount) * 2 + 1;
+    int advance_display_size = dup_len + (penguinCount + fishCount) * 2 + 1;      
     char *advance_display = malloc(advance_display_size);
     advance_display[advance_display_size - 1] = '\0';
 
