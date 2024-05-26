@@ -8,13 +8,15 @@
 #include "color.h"
 #include "penguin.h"
 #include "player.h"
+// Define  mouvement
 
-// Define the player colors
+
+// Moves the position up
 void up(int *row, int *col) {
     *row -= 1;
 }
 
-// Moves the position to the right
+// Moves the position down
 void down(int *row, int *col) {
     *row += 1;
 }
